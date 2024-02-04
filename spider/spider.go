@@ -8,17 +8,17 @@ import (
 )
 
 type Spider struct {
-	Generate       func(chan string)
-	Parse          func(*requests.Response) interface{}
-	Process        func(interface{})
-	NParallels     int
-	MaxRetry       int
-	SessionOptions *requests.SessionOptions
+	Generate   func(chan string)
+	Parse      func(*requests.Response) interface{}
+	Process    func(interface{})
+	Finalize   func()
+	Session    *requests.Session
+	NParallels int
+	MaxRetry   int
 
-	resCh   chan chan interface{}
-	urlCh   chan string
-	mutex   *sync.Mutex
-	session *requests.Session
+	resCh chan chan interface{}
+	urlCh chan string
+	mutex *sync.Mutex
 }
 
 func (s *Spider) fetch(url string) *requests.Response {
@@ -27,7 +27,7 @@ func (s *Spider) fetch(url string) *requests.Response {
 		if i != 0 {
 			log.Println("Retrying", url, "*", i)
 		}
-		r, err := s.session.Get(url, nil)
+		r, err := s.Session.Get(url, nil)
 		if err != nil {
 			log.Println(err.Error())
 			continue
@@ -66,7 +66,6 @@ func (s *Spider) Run() {
 	if s.NParallels == 0 {
 		s.NParallels = 256
 	}
-	s.session = requests.NewSession(s.SessionOptions)
 	s.mutex = &sync.Mutex{}
 
 	go s.Generate(s.urlCh)
@@ -80,5 +79,9 @@ func (s *Spider) Run() {
 			break
 		}
 		s.Process(<-c)
+	}
+
+	if s.Finalize != nil {
+		s.Finalize()
 	}
 }

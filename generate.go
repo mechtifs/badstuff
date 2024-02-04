@@ -17,7 +17,7 @@ func getEndId() int {
 	if err != nil {
 		panic("Cannot fetch end ID")
 	}
-	articles := exp["article"].FindAllSubmatch(r.Content, -1)
+	articles := exp["article"].FindAllSubmatch(r.Body, -1)
 	var endId int
 	for _, article := range articles {
 		if !strings.Contains(string(article[1]), "sticky") {
@@ -39,7 +39,7 @@ func generate(c chan string) {
 		startId = results[len(results)-1].Index + 1
 	}
 	endId := getEndId()
-	for i := startId; i < endId; i++ {
+	for i := startId; i <= endId; i++ {
 		c <- fmt.Sprintf(baseUrl, i)
 	}
 	close(c)

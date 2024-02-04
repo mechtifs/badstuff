@@ -36,7 +36,7 @@ var exp = map[string]*regexp.Regexp{
 var results = make([]*ParseResult, 0)
 
 func parse(r *requests.Response) interface{} {
-	contents := exp["content"].FindSubmatch(r.Content)
+	contents := exp["content"].FindSubmatch(r.Body)
 	if contents == nil {
 		return nil
 	}
@@ -58,7 +58,7 @@ func parse(r *requests.Response) interface{} {
 	}
 
 	var titleStr string
-	titles := exp["title"].FindSubmatch(r.Content)
+	titles := exp["title"].FindSubmatch(r.Body)
 	if titles != nil {
 		titleStr = html.UnescapeString(string(titles[1]))
 		if titleStr == "未找到页面" {
@@ -66,16 +66,16 @@ func parse(r *requests.Response) interface{} {
 		}
 	}
 
-	timeIso8601, _ := time.Parse(time.RFC3339, string(exp["time"].FindSubmatch(r.Content)[1]))
+	timeIso8601, _ := time.Parse(time.RFC3339, string(exp["time"].FindSubmatch(r.Body)[1]))
 
 	categoryStrs := []string{}
-	categories := exp["category"].FindAllSubmatch(r.Content, -1)
+	categories := exp["category"].FindAllSubmatch(r.Body, -1)
 	for i := 0; i < len(categories); i++ {
 		categoryStrs = append(categoryStrs, html.UnescapeString(string(categories[i][1])))
 	}
 
 	tagStrs := []string{}
-	tags := exp["tag"].FindAllSubmatch(r.Content, -1)
+	tags := exp["tag"].FindAllSubmatch(r.Body, -1)
 	for i := 0; i < len(tags); i++ {
 		tagStrs = append(tagStrs, html.UnescapeString(string(tags[i][1])))
 	}

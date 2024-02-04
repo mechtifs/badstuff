@@ -9,7 +9,7 @@ import (
 
 type SessionOptions struct {
 	Header     http.Header
-	NoRedirect bool
+	DoRedirect bool
 	Timeout    time.Duration
 }
 
@@ -24,7 +24,7 @@ func NewSession(opt *SessionOptions) *Session {
 		if opt.Header != nil {
 			s.Header = opt.Header
 		}
-		if opt.NoRedirect {
+		if !opt.DoRedirect {
 			s.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 				return http.ErrUseLastResponse
 			}
@@ -42,7 +42,13 @@ func (s *Session) Request(method string, url string, opt *RequestOptions) (*Resp
 	if err != nil {
 		return nil, err
 	}
+
 	if opt != nil {
+		if opt.Header != nil {
+			for k, v := range opt.Header {
+				req.Header[k] = v
+			}
+		}
 		if opt.Body != nil {
 			req.Body = io.NopCloser(bytes.NewBuffer(opt.Body))
 		}
@@ -61,7 +67,7 @@ func (s *Session) Request(method string, url string, opt *RequestOptions) (*Resp
 
 	return &Response{
 		Url:        url,
-		Content:    buf,
+		Body:       buf,
 		Header:     resp.Header,
 		StatusCode: resp.StatusCode,
 	}, nil

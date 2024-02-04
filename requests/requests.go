@@ -8,7 +8,7 @@ import (
 
 type Response struct {
 	Url        string
-	Content    []byte
+	Body       []byte
 	Header     http.Header
 	StatusCode int
 }
@@ -47,7 +47,7 @@ func Request(method string, url string, opt *RequestOptions) (*Response, error) 
 
 	return &Response{
 		Url:        url,
-		Content:    buf,
+		Body:       buf,
 		Header:     resp.Header,
 		StatusCode: resp.StatusCode,
 	}, nil
