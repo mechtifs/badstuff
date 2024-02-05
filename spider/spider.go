@@ -7,21 +7,21 @@ import (
 	"badstuff/requests"
 )
 
-type Spider struct {
+type Spider[T any] struct {
 	Generate   func(chan string)
-	Parse      func(*requests.Response) interface{}
-	Process    func(interface{})
+	Parse      func(*requests.Response) T
+	Process    func(T)
 	Finalize   func()
 	Session    *requests.Session
 	NParallels int
 	MaxRetry   int
 
-	resCh chan chan interface{}
+	resCh chan chan T
 	urlCh chan string
 	mutex *sync.Mutex
 }
 
-func (s *Spider) fetch(url string) *requests.Response {
+func (s *Spider[T]) fetch(url string) *requests.Response {
 	log.Println("Fetching", url)
 	for i := 0; i <= s.MaxRetry; i++ {
 		if i != 0 {
@@ -41,11 +41,11 @@ func (s *Spider) fetch(url string) *requests.Response {
 	return nil
 }
 
-func (s *Spider) newTask() {
+func (s *Spider[T]) newTask() {
 	s.mutex.Lock()
 	url, ok := <-s.urlCh
 	if ok {
-		c := make(chan interface{}, 1)
+		c := make(chan T, 1)
 		s.resCh <- c
 		go func() {
 			c <- s.Parse(s.fetch(url))
@@ -57,8 +57,8 @@ func (s *Spider) newTask() {
 	s.mutex.Unlock()
 }
 
-func (s *Spider) Run() {
-	s.resCh = make(chan chan interface{}, 2*s.NParallels)
+func (s *Spider[T]) Run() {
+	s.resCh = make(chan chan T, 2*s.NParallels)
 	s.urlCh = make(chan string, 1)
 	if s.MaxRetry == 0 {
 		s.MaxRetry = 65535

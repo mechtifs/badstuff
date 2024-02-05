@@ -8,12 +8,11 @@ import (
 
 var lastProcessTime int
 
-func process(i interface{}) {
+func process(i *ParseResult) {
 	if i == nil {
 		return
 	}
-	results = append(results, i.(*ParseResult))
-
+	results = append(results, i)
 	currentTime := int(time.Now().Unix())
 	if currentTime == lastProcessTime {
 		return

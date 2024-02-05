@@ -13,7 +13,7 @@ func main() {
 			"User-Agent": {"Mozilla/5.0"},
 		},
 	})
-	spider := &spider.Spider{
+	spider := &spider.Spider[*ParseResult]{
 		Generate:   generate,
 		Parse:      parse,
 		Process:    process,

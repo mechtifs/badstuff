@@ -35,7 +35,7 @@ var exp = map[string]*regexp.Regexp{
 
 var results = make([]*ParseResult, 0)
 
-func parse(r *requests.Response) interface{} {
+func parse(r *requests.Response) *ParseResult {
 	contents := exp["content"].FindSubmatch(r.Body)
 	if contents == nil {
 		return nil

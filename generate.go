@@ -10,7 +10,7 @@ import (
 	"badstuff/requests"
 )
 
-const baseUrl = `https://www.hacg.lv/wp/%d.html`
+const baseUrl = `https://www.hacg.mov/wp/%d.html`
 
 func getEndId() int {
 	r, err := requests.Get(fmt.Sprintf(baseUrl, 0)+`/`, nil)
