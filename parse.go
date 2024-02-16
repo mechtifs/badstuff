@@ -33,8 +33,6 @@ var exp = map[string]*regexp.Regexp{
 	"time":      regexp.MustCompile(`datetime="(.+?)"`),
 }
 
-var results = make([]*ParseResult, 0)
-
 func parse(r *requests.Response) *ParseResult {
 	contents := exp["content"].FindSubmatch(r.Body)
 	if contents == nil {
@@ -45,11 +43,11 @@ func parse(r *requests.Response) *ParseResult {
 
 	magnetStrs := []string{}
 	magnetsHex := exp["magnetHex"].FindAllSubmatch(contents[1], -1)
-	for i := 0; i < len(magnetsHex); i++ {
+	for i := range len(magnetsHex) {
 		magnetStrs = append(magnetStrs, "magnet:?xt=urn:btih:"+strings.ToLower(string(magnetsHex[i][1])))
 	}
 	magnetsB32 := exp["magnetB32"].FindAllSubmatch(contents[1], -1)
-	for i := 0; i < len(magnetsB32); i++ {
+	for i := range len(magnetsB32) {
 		decoded, err := base32.StdEncoding.DecodeString(string(magnetsB32[i][1]))
 		if err != nil {
 			continue
@@ -70,13 +68,13 @@ func parse(r *requests.Response) *ParseResult {
 
 	categoryStrs := []string{}
 	categories := exp["category"].FindAllSubmatch(r.Body, -1)
-	for i := 0; i < len(categories); i++ {
+	for i := range len(categories) {
 		categoryStrs = append(categoryStrs, html.UnescapeString(string(categories[i][1])))
 	}
 
 	tagStrs := []string{}
 	tags := exp["tag"].FindAllSubmatch(r.Body, -1)
-	for i := 0; i < len(tags); i++ {
+	for i := range len(tags) {
 		tagStrs = append(tagStrs, html.UnescapeString(string(tags[i][1])))
 	}
 

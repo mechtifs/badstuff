@@ -23,7 +23,7 @@ type Spider[T any] struct {
 
 func (s *Spider[T]) fetch(url string) *requests.Response {
 	log.Println("Fetching", url)
-	for i := 0; i <= s.MaxRetry; i++ {
+	for i := range s.MaxRetry + 1 {
 		if i != 0 {
 			log.Println("Retrying", url, "*", i)
 		}
@@ -70,7 +70,7 @@ func (s *Spider[T]) Run() {
 
 	go s.Generate(s.urlCh)
 
-	for i := 0; i < s.NParallels; i++ {
+	for range s.NParallels {
 		go s.newTask()
 	}
 
