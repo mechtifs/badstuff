@@ -14,8 +14,6 @@ import (
 	"time"
 )
 
-const baseUrl = `https://www.hacg.mov/wp/%d.html`
-
 var re = map[string]*regexp.Regexp{
 	"index":     regexp.MustCompile(`\/wp\/(\d+).html`),
 	"article":   regexp.MustCompile(`class="post-(.+?)"`),
@@ -38,13 +36,14 @@ type HResult struct {
 }
 
 type HWorkflow struct {
+	BaseUri         string
 	Results         []*HResult
 	OutputPath      string
 	lastProcessTime int
 }
 
-func getEndId() int {
-	r, err := requests.Get(fmt.Sprintf(baseUrl, 0)+`/`, nil)
+func (w *HWorkflow) getEndId() int {
+	r, err := requests.Get(fmt.Sprintf(w.BaseUri, 0)+`/`, nil)
 	if err != nil {
 		panic("Cannot fetch end ID")
 	}
@@ -62,6 +61,11 @@ func getEndId() int {
 	return endId
 }
 
+func (w *HWorkflow) dumpResults() {
+	j, _ := json.MarshalIndent(w.Results, "", "  ")
+	os.WriteFile(w.OutputPath, j, 0644)
+}
+
 func (w *HWorkflow) Init() {
 	f, err := os.ReadFile(w.OutputPath)
 	if err == nil {
@@ -74,9 +78,9 @@ func (w *HWorkflow) Generate(c chan string) {
 	if len(w.Results) > 0 {
 		startId = w.Results[len(w.Results)-1].Index + 1
 	}
-	endId := getEndId()
+	endId := w.getEndId()
 	for i := startId; i <= endId; i++ {
-		c <- fmt.Sprintf(baseUrl, i)
+		c <- fmt.Sprintf(w.BaseUri, i)
 	}
 	close(c)
 }
@@ -146,11 +150,9 @@ func (w *HWorkflow) Process(i *HResult) {
 		return
 	}
 	w.lastProcessTime = currentTime
-	j, _ := json.MarshalIndent(w.Results, "", "  ")
-	os.WriteFile(w.OutputPath, j, 0644)
+	w.dumpResults()
 }
 
 func (w *HWorkflow) Finalize() {
-	j, _ := json.MarshalIndent(w.Results, "", "  ")
-	os.WriteFile(w.OutputPath, j, 0644)
+	w.dumpResults()
 }

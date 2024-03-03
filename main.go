@@ -13,6 +13,7 @@ func main() {
 	})
 	spider := &spider.Spider[*HResult]{
 		Workflow: &HWorkflow{
+			BaseUri:    "https://www.hacg.mov/wp/%d.html",
 			OutputPath: "output/entries.json",
 		},
 		Session:    session,
