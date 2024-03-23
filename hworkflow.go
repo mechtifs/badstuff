@@ -96,7 +96,10 @@ func (w *HWorkflow) Parse(r *requests.Response) *HResult {
 	magnetStrs := []string{}
 	magnetsHex := re["magnetHex"].FindAllSubmatch(contents[1], -1)
 	for i := range len(magnetsHex) {
-		magnetStrs = append(magnetStrs, "magnet:?xt=urn:btih:"+strings.ToLower(string(magnetsHex[i][1])))
+		builder := &strings.Builder{}
+		builder.WriteString("magnet:?xt=urn:btih:")
+		builder.WriteString(strings.ToLower(string(magnetsHex[i][1])))
+		magnetStrs = append(magnetStrs, builder.String())
 	}
 	magnetsB32 := re["magnetB32"].FindAllSubmatch(contents[1], -1)
 	for i := range len(magnetsB32) {
@@ -104,7 +107,10 @@ func (w *HWorkflow) Parse(r *requests.Response) *HResult {
 		if err != nil {
 			continue
 		}
-		magnetStrs = append(magnetStrs, "magnet:?xt=urn:btih:"+hex.EncodeToString(decoded))
+		builder := &strings.Builder{}
+		builder.WriteString("magnet:?xt=urn:btih:")
+		builder.WriteString(hex.EncodeToString(decoded))
+		magnetStrs = append(magnetStrs, builder.String())
 	}
 
 	var titleStr string

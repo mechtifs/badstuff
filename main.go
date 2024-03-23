@@ -17,7 +17,7 @@ func main() {
 			OutputPath: "output/entries.json",
 		},
 		Session:    session,
-		NParallels: 128,
+		NParallels: 4,
 	}
 	spider.Run()
 }
